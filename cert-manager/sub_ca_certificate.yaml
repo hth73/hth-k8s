@@ -1,0 +1,34 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: htdom-sub-ca
+  namespace: cert-manager
+spec:
+  commonName: "htdom-sub-ca"
+  secretName: "htdom-sub-ca-secret"
+  isCA: true
+  duration: 26280h # 3 Jahre
+  renewBefore: 720h # 30 Tage vor Ablauf erneuern
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    rotationPolicy: Always
+  usages:
+    - digital signature
+    - key encipherment
+    - cert sign
+  subject:
+    organizations:
+      - "HTDOM Inc."
+    organizationalUnits:
+      - "IT"
+    countries:
+      - "DE"
+    localities:
+      - "Munich"
+    provinces:
+      - "Bavaria"
+  issuerRef:
+    name: htdom-root-ca
+    kind: ClusterIssuer

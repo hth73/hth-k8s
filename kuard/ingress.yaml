@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kuard.htdom.local
+  namespace: kuard
+  annotations:
+    cert-manager.io/clusterissuer: htdom-sub-ca
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - kuard.htdom.local
+    secretName: kuard-htdom-local-secret
+  rules:
+  - host: kuard.htdom.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kuard
+            port:
+              number: 80

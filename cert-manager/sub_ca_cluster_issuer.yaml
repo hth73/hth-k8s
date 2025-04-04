@@ -1,0 +1,9 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: htdom-sub-ca
+  namespace: cert-manager
+spec:
+  ca:
+    secretName: htdom-sub-ca-secret

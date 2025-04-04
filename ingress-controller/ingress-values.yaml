@@ -1,0 +1,31 @@
+controller:
+  replicaCount: 1
+  service:
+    type: LoadBalancer
+    ports:
+      http: 80
+      https: 443
+  ingressClassResource:
+    name: nginx
+    default: true
+  watchIngressWithoutClass: true
+  config:
+    use-forwarded-headers: "true"
+    compute-full-forwarded-for: "true"
+  extraArgs:
+    enable-ssl-passthrough: ""
+  metrics:
+    enabled: true
+  tolerations:
+    - key: "node-role.kubernetes.io/master"
+      effect: "NoSchedule"
+    - key: "CriticalAddonsOnly"
+      operator: "Exists"
+    - key: "node.kubernetes.io/not-ready"
+      operator: "Exists"
+      effect: "NoSchedule"
+    - key: "node.kubernetes.io/unreachable"
+      operator: "Exists"
+      effect: "NoSchedule"
+defaultBackend:
+  enabled: true
