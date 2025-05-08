@@ -1,0 +1,121 @@
+---
+image:
+  repository: nextcloud
+  flavor: apache
+  tag: 31.0.4
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: htdom-sub-ca
+  hosts:
+    - host: nextcloud.htdom.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nextcloud-htdom-local-secret
+      hosts:
+        - nextcloud.htdom.local
+
+phpClientHttpsFix:
+  enabled: true
+  protocol: https
+
+nextcloud:
+  host: nextcloud.htdom.local
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-admin-credentials
+    usernameKey: nextcloud_admin_user
+    passwordKey: nextcloud_admin_password
+  update: 0
+  containerPort: 80
+  datadir: /var/www/html/data
+  persistence:
+    subPath: ""
+  trustedDomains:
+    - nextcloud.htdom.local
+  objectStore:
+    s3:
+      enabled: true
+      host: "minio.htdom.local"
+      ssl: false
+      port: "9000"
+      bucket: "nextcloud"
+      usePathStyle: true
+      autoCreate: false
+      existingSecret: "nextcloud-s3-credentials"
+      secretKeys:
+        accessKey: s3_access_key
+        secretKey: s3_secret_key
+  phpConfigs: {}
+  defaultConfigs:
+    .htaccess: true
+    apache-pretty-urls.config.php: true
+    apcu.config.php: true
+    apps.config.php: true
+    autoconfig.php: true
+    reverse-proxy.config.php: true
+    s3.config.php: true
+    upgrade-disable-web.config.php: true
+    imaginary.config.php: false
+
+service:
+  type: ClusterIP
+  port: 80
+
+mariadb:
+  enabled: false
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: mysql
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-db-credentials
+    hostKey: db_hostname
+    databaseKey: db_name
+    usernameKey: db_username
+    passwordKey: db_password
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClassName: local-path
+
+livenessProbe:
+ enabled: true
+ initialDelaySeconds: 10
+ periodSeconds: 10
+ timeoutSeconds: 5
+ failureThreshold: 3
+ successThreshold: 1
+readinessProbe:
+ enabled: true
+ initialDelaySeconds: 10
+ periodSeconds: 10
+ timeoutSeconds: 5
+ failureThreshold: 3
+ successThreshold: 1
+startupProbe:
+ enabled: false
+ initialDelaySeconds: 30
+ periodSeconds: 10
+ timeoutSeconds: 5
+ failureThreshold: 30
+ successThreshold: 1
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

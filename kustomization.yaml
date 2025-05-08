@@ -5,6 +5,4 @@ buildMetadata: [originAnnotations]
 resources:
   - cert-manager
   - ingress-controller
-  - kuard
-  - ingress
   - kubernetes-dashboard

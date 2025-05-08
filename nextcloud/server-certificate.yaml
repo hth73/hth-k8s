@@ -1,0 +1,35 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nextcloud.htdom.local
+  namespace: nextcloud
+spec:
+  commonName: nextcloud.htdom.local
+  dnsNames:
+    - nextcloud.htdom.local
+  secretName: nextcloud-htdom-local-secret # server secret
+  duration: 2160h # 90 days
+  renewBefore: 360h # renewal 15 days before expires
+  usages:
+    - server auth
+    - client auth
+  privateKey:
+    algorithm: RSA # or RSA oder ECDSA
+    encoding: PKCS1 
+    size: 2048 # 2048 for RSA/256 for ECDSA
+  subject:
+    organizations:
+      - "HTDOM Inc." # (O) Organization
+    organizationalUnits:
+      - "IT" # (OU) Organizational unit
+    countries:
+      - "DE" # (C) Country
+    localities:
+      - "Munich" # (L) Location
+    provinces:
+      - "Bavaria" # (ST) Province
+  issuerRef:
+    name: htdom-sub-ca
+    kind: ClusterIssuer
+    group: cert-manager.io

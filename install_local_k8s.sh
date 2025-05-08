@@ -61,7 +61,7 @@ ports:
       - server:*
 registries:
   create:
-    image: docker.io/registry:2.8.3
+    image: docker.io/registry:3
     name: k3d-registry.127.0.0.1.nip.io
     host: 127.0.0.1
     hostPort: "5000"
@@ -94,8 +94,11 @@ install-cluster() {
   generate_k3d_config "$AGENT_COUNT"
 
   echo "Starte Cluster mit $AGENT_COUNT Agent(en)..."
-  k3d cluster create -c "$WORKDIR/k3d-config.yaml"
+  k3d cluster create --config "$WORKDIR/k3d-config.yaml"
   sleep 10
+
+  ## install custom cordns nameserver (192.168.xxx.xxx)
+  kubectl apply -f "$WORKDIR/coredns-custom.yaml"
 
   ## install ingress-nginx
   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx --force-update
@@ -104,7 +107,7 @@ install-cluster() {
 
   ## install cert-manager and create root and sub-ca
   helm repo add jetstack https://charts.jetstack.io --force-update
-  helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.17.0 --set crds.enabled=true --set crds.keep=true
+  helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.17.2 --set crds.enabled=true --set crds.keep=true
 
   kubectl apply -f cert-manager/root_ca_cluster_issuer.yaml
   sleep 5
@@ -129,11 +132,7 @@ install-cluster() {
 
   kubectl apply -k kubernetes-dashboard/
   sleep 5
-  kubectl create token admin-user -n kubernetes-dashboard > token.txt
-  token=$(<token.txt)
-  echo $token | gopass insert -f <mystore>/dashboard/admin-user
-  rm -r token.txt
-  gopass show <mystore>/dashboard/admin-user
+  kubectl create token admin-user -n kubernetes-dashboard
 }
 
 start-cluster() {
